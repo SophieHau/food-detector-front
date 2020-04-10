@@ -5,6 +5,7 @@ import ImageLinkForm from './components/imageLinkForm/imageLinkForm';
 import Rank from './components/rank/rank';
 import FoodRecognition from './components/foodRecognition/foodRecognition';
 import Signin from './components/signin/signin';
+import Register from './components/register/register';
 import './App.css';
 import Clarifai from 'clarifai';
 
@@ -20,6 +21,8 @@ class App extends React.Component {
       input: '',
       imageUrl: '',
       food: '',
+      route: 'signin',
+      isSignedIn: false
     }
   }
 
@@ -51,18 +54,37 @@ class App extends React.Component {
         console.log(err);
       })
   }; 
+
+  onRouteChange = (route) => {
+    if (route === 'signout') {
+      this.setState({isSignedIn: false})
+    } else if (route === 'home') {
+      this.setState({isSignedIn: true})
+    }
+    this.setState({route: route});
+  }
   
   render() {
+    const {isSignedIn, route, food, imageUrl } = this.state;
     return (
       <div className="App">
-        <Navigation />
-        <Signin />
-        <Logo />
-        <Rank food={this.state.food}/>
-        <ImageLinkForm 
-          onInputChange={this.onInputChange} 
-          onSubmit={this.onSubmit}/>
-        <FoodRecognition imageUrl={this.state.imageUrl}/>
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange}/>
+        { route === 'home'
+          ? <div>
+              <Logo />
+              <Rank food={food}/>
+              <ImageLinkForm 
+                onInputChange={this.onInputChange} 
+                onSubmit={this.onSubmit}/>
+              <FoodRecognition imageUrl={imageUrl}/>
+            </div> 
+          
+          : (
+            route === 'signin'
+            ? <Signin onRouteChange={ this.onRouteChange }/>
+            : <Register onRouteChange={this.onRouteChange} />
+            ) 
+        }
       </div>
     );
   };
