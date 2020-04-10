@@ -3,12 +3,14 @@ import Navigation from './components/navigation/navigation';
 import Logo from './components/logo/logo';
 import ImageLinkForm from './components/imageLinkForm/imageLinkForm';
 import Rank from './components/rank/rank';
+import FoodRecognition from './components/foodRecognition/foodRecognition';
+import Signin from './components/signin/signin';
 import './App.css';
 import Clarifai from 'clarifai';
 
 
 const app = new Clarifai.App({
-  apiKey: 'YOUR_API_KEY'
+  apiKey: '170c850e3cb041068eb526c625cdfc11'
  });
 
 class App extends React.Component {
@@ -16,38 +18,54 @@ class App extends React.Component {
     super();
     this.state = {
       input: '',
+      imageUrl: '',
+      food: '',
     }
+  }
+
+  getFoodNames = (data) => {
+    const clarifaiFoodList = data.outputs[0].data.concepts;
+    const foodList = clarifaiFoodList.map(food => {
+      return food.name
+    })
+    return foodList.slice(0,3);
+  }; 
+
+  displayFoodNames = (data) => {
+    console.log(data);
+    this.setState({food: 'This is ' + data[0] + ' or ' + data[1] + ' or ' + data[2] + '!'});
   }
 
   onInputChange = (event) => {
-    console.log(event.target.value);
-  }
+    this.setState({input: event.target.value});
+  };
 
   onSubmit = () => {
-    console.log('click');
-    app.models.predict("bd367be194cf45149e75f01d59f77ba7", "https://samples.clarifai.com/food.jpg").then(
-    function(response) {
-      // do something with response
-    },
-    function(err) {
-      // there was an error
-    }
-  );
-  }
-
+    this.setState({imageUrl: this.state.input});
+    app.models
+      .predict(
+        Clarifai.FOOD_MODEL,
+        this.state.input)
+      .then(response => this.displayFoodNames(this.getFoodNames(response)))
+      .catch(err => {
+        console.log(err);
+      })
+  }; 
+  
   render() {
     return (
       <div className="App">
         <Navigation />
+        <Signin />
         <Logo />
-        <Rank />
+        <Rank food={this.state.food}/>
         <ImageLinkForm 
           onInputChange={this.onInputChange} 
           onSubmit={this.onSubmit}/>
-        {/* <FaceRecognition /> */}
+        <FoodRecognition imageUrl={this.state.imageUrl}/>
       </div>
     );
-  }
-}
+  };
+};
 
 export default App;
