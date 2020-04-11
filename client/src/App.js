@@ -22,8 +22,25 @@ class App extends React.Component {
       imageUrl: '',
       food: '',
       route: 'signin',
-      isSignedIn: false
+      isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
     }
+  }
+
+  loadUser = (data) => {
+    this.setState({user: {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      entries: 0,
+      joined: data.joined
+    }})
   }
 
   getFoodNames = (data) => {
@@ -48,10 +65,25 @@ class App extends React.Component {
       .predict(
         Clarifai.FOOD_MODEL,
         this.state.input)
-      .then(response => this.displayFoodNames(this.getFoodNames(response)))
+      .then(response => {
+        if (response) {
+          fetch('http://localhost:3000/image', {
+            method: 'put',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count }))
+            })
+        }
+        this.displayFoodNames(this.getFoodNames(response))
       .catch(err => {
         console.log(err);
       })
+    })
   }; 
 
   onRouteChange = (route) => {
@@ -64,14 +96,14 @@ class App extends React.Component {
   }
   
   render() {
-    const {isSignedIn, route, food, imageUrl } = this.state;
+    const {isSignedIn, route, food, imageUrl, user } = this.state;
     return (
       <div className="App">
         <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange}/>
         { route === 'home'
           ? <div>
               <Logo />
-              <Rank food={food}/>
+              <Rank food={food} name={user.name} entries={user.entries} />
               <ImageLinkForm 
                 onInputChange={this.onInputChange} 
                 onSubmit={this.onSubmit}/>
@@ -80,8 +112,8 @@ class App extends React.Component {
           
           : (
             route === 'signin'
-            ? <Signin onRouteChange={ this.onRouteChange }/>
-            : <Register onRouteChange={this.onRouteChange} />
+            ? <Signin loadUser={this.loadUser} onRouteChange={ this.onRouteChange }/>
+            : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
             ) 
         }
       </div>

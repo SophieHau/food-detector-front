@@ -1,9 +1,26 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const knex = require('knex');
 
+const db = knex({
+    client: 'pg',
+    connection: {
+        host :'127.0.0.1',
+        user : 'sophie',
+        password : '12345',
+        database : 'food-detect'
+    }
+});
+
+db.select('*').from('users').then(data => {
+    console.log(data);
+});
 
 const app = express();
+
 app.use(bodyParser.json());
+app.use(cors());
 
 const database = {
     users: [
@@ -27,13 +44,13 @@ const database = {
 }
 
 app.get('/', (req, res)=> {
-    res.send('This is working');
+    res.send(database.users);
 })
 
 app.post('/signin', (req, res) => {
     if (req.body.email === database.users[0].email && 
         req.body.password === database.users[0].password) {
-        res.json('success');
+        res.json(database.users[0]);
         } else {
             res.status(400).json('error logging in');
         }
@@ -42,16 +59,18 @@ app.post('/signin', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-    const { email, name, password } = req.body;
-    database.users.push({
-        id:'125',
-        name: name,
-        email: email,
-        password: password,
-        entries: 0,
-        joined: new Date()
-    })
-    res.json(database.users[database.users.length-1])
+    const { email, name } = req.body;
+    db('users')
+        .returning('*')
+        .insert({
+            email: email,
+            name: name,
+            joined: new Date()
+        })
+        .then(users => {
+            res.json(users[0]);
+        })
+        .catch(err => res.status(400).json("Unable to register"))
 })
 
 app.get('/profile/:id', (req, res) => {

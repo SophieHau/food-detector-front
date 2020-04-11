@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const Rank = ({ food }) => {
+const Rank = ({ food, name, entries }) => {
     return (
         <div>
             <div className='f1 orange'>
@@ -9,7 +9,7 @@ const Rank = ({ food }) => {
             </div>
             <br />
             <div className='f3'>
-                {'Sophie, your current rank is...'}{'5'}
+                {`${name}, your current entry count is ${entries}`}
             </div>
         </div>
     );
