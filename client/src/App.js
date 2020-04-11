@@ -14,23 +14,25 @@ const app = new Clarifai.App({
   apiKey: '170c850e3cb041068eb526c625cdfc11'
  });
 
+const initialState = {
+  input: '',
+  imageUrl: '',
+  food: '',
+  route: 'signin',
+  isSignedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    entries: 0,
+    joined: ''
+  }
+}
+
 class App extends React.Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageUrl: '',
-      food: '',
-      route: 'signin',
-      isSignedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        joined: ''
-      }
-    }
+    this.state = initialState
   }
 
   loadUser = (data) => {
@@ -38,7 +40,7 @@ class App extends React.Component {
       id: data.id,
       name: data.name,
       email: data.email,
-      entries: 0,
+      entries: data.entries,
       joined: data.joined
     }})
   }
@@ -78,6 +80,7 @@ class App extends React.Component {
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count }))
             })
+            .catch(console.log)
         }
         this.displayFoodNames(this.getFoodNames(response))
       .catch(err => {
@@ -88,7 +91,7 @@ class App extends React.Component {
 
   onRouteChange = (route) => {
     if (route === 'signout') {
-      this.setState({isSignedIn: false})
+      this.setState(initialState)
     } else if (route === 'home') {
       this.setState({isSignedIn: true})
     }
