@@ -7,12 +7,7 @@ import FoodRecognition from './components/foodRecognition/foodRecognition';
 import Signin from './components/signin/signin';
 import Register from './components/register/register';
 import './App.css';
-import Clarifai from 'clarifai';
 
-
-const app = new Clarifai.App({
-  apiKey: '170c850e3cb041068eb526c625cdfc11'
- });
 
 const initialState = {
   input: '',
@@ -63,31 +58,33 @@ class App extends React.Component {
 
   onSubmit = () => {
     this.setState({imageUrl: this.state.input});
-    app.models
-      .predict(
-        Clarifai.FOOD_MODEL,
-        this.state.input)
-      .then(response => {
-        if (response) {
-          fetch('http://localhost:3000/image', {
-            method: 'put',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              id: this.state.user.id
-            })
-          })
-            .then(response => response.json())
-            .then(count => {
-              this.setState(Object.assign(this.state.user, { entries: count }))
-            })
-            .catch(console.log)
-        }
-        this.displayFoodNames(this.getFoodNames(response))
-      .catch(err => {
-        console.log(err);
+      fetch('http://localhost:3000/imageurl', {
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          input: this.state.input
+        })
       })
+        .then(response => response.json())
+        .then(response => {
+          if (response) {
+            fetch('http://localhost:3000/image', {
+              method: 'put',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                id: this.state.user.id
+              })
+            })
+              .then(response => response.json())
+              .then(count => {
+                this.setState(Object.assign(this.state.user, { entries: count }))
+              })
+              .catch(console.log)
+          }
+          this.displayFoodNames(this.getFoodNames(response));
     })
   }; 
+
 
   onRouteChange = (route) => {
     if (route === 'signout') {
