@@ -4,10 +4,6 @@ const cors = require('cors');
 const knex = require('knex');
 const bcrypt = require('bcrypt-nodejs');
 const Clarifai = require('clarifai');
-const path = require('path');
-const enforce = require('express-sslify');
-
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 
 const api = new Clarifai.App({
@@ -26,21 +22,7 @@ const db = knex({
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
-
-if (process.env.NODE_ENV === 'production') {
-    app.use(enforce.HTTPS({ trustProtoHeader: true }));
-    app.use(express.static(path.join(__dirname, 'client/build')));
-  
-    app.get('*', function(req, res) {
-      res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-    });
-  }
-
-app.get('/service-worker.js', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '..', 'build', 'service-worker.js'));
-});
 
 app.get('/', (req, res)=> {
     res.send(database.users);
