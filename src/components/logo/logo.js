@@ -1,6 +1,6 @@
 import React from 'react';
 import Tilt from 'react-tilt';
-import detect from './face-detection.png';
+import detect from './food-detection.png';
 
 const Logo = () => {
     return (
