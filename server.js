@@ -14,10 +14,8 @@ const api = new Clarifai.App({
 const db = knex({
     client: 'pg',
     connection: {
-        host :'127.0.0.1',
-        user : 'sophie',
-        password : '12345',
-        database : 'food-detect'
+        host : process.env.DATABASE_URL,
+        ssl: true
     }
 });
 
@@ -27,7 +25,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/', (req, res)=> {
-    res.send('this is working');
+    res.send(database.users);
 })
 
 app.post('/signin', (req, res) => {
