@@ -9,7 +9,7 @@ const Rank = ({ food, name, entries }) => {
             </div>
             <br />
             <div className='f3'>
-                {`${name}, your current entry count is ${entries}`}
+                {`Hi ${name}, your current entry count is ${entries}.`}
             </div>
         </div>
     );
